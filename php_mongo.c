@@ -125,6 +125,15 @@ STD_PHP_INI_ENTRY("mongo.allow_empty_keys", "0", PHP_INI_ALL, OnUpdateLong, allo
 STD_PHP_INI_ENTRY("mongo.no_id", "0", PHP_INI_SYSTEM, OnUpdateLong, no_id, zend_mongo_globals, mongo_globals)
 STD_PHP_INI_ENTRY("mongo.ping_interval", "5", PHP_INI_ALL, OnUpdateLong, ping_interval, zend_mongo_globals, mongo_globals)
 STD_PHP_INI_ENTRY("mongo.is_master_interval", "60", PHP_INI_ALL, OnUpdateLong, is_master_interval, zend_mongo_globals, mongo_globals)
+
+#ifdef HAVE_MONGO_SESSION
+STD_PHP_INI_ENTRY("mongo.session_url", "mongodb://localhost:27017", PHP_INI_ALL, OnUpdateString, session_url, zend_mongo_globals, mongo_globals)
+STD_PHP_INI_ENTRY("mongo.session_db", "session_db", PHP_INI_ALL, OnUpdateString, session_db, zend_mongo_globals, mongo_globals)
+STD_PHP_INI_ENTRY("mongo.session_collection", "session_collection", PHP_INI_ALL, OnUpdateString, session_collection, zend_mongo_globals, mongo_globals)
+STD_PHP_INI_ENTRY("mongo.session_expire", "86400", PHP_INI_ALL, OnUpdateLong, session_expire, zend_mongo_globals, mongo_globals)
+STD_PHP_INI_ENTRY("mongo.session_replica_name", "", PHP_INI_ALL, OnUpdateString, session_replica_name, zend_mongo_globals, mongo_globals)
+#endif  /* HAVE_MONGO_SESSION */
+
 PHP_INI_END()
 /* }}} */
 
@@ -200,6 +209,11 @@ PHP_MINIT_FUNCTION(mongo) {
     return FAILURE;
   }
 #endif
+
+
+#ifdef  HAVE_MONGO_SESSION
+	php_session_register_module(&ps_mod_mongo);
+#endif  /* HAVE_MONGO_SESSION */
 
   return SUCCESS;
 }
@@ -279,6 +293,17 @@ static void mongo_init_globals(zend_mongo_globals *mongo_globals TSRMLS_DC)
 
 	mongo_globals->log_level = 0;
 	mongo_globals->log_module = 0;
+
+
+#ifdef  HAVE_MONGO_SESSION
+    mongo_globals->session_url            = "mongodb://localhost:27017";
+    mongo_globals->session_db             = "session_db";
+    mongo_globals->session_collection     = "session_collection";
+    mongo_globals->session_expire         = 86400;
+    mongo_globals->session_replica_name   = "";
+#endif  /* HAVE_MONGO_SESSION */
+
+
 }
 /* }}} */
 
@@ -316,6 +341,10 @@ PHP_MINFO_FUNCTION(mongo) {
 
   php_info_print_table_header(2, "MongoDB Support", "enabled");
   php_info_print_table_row(2, "Version", PHP_MONGO_VERSION);
+
+#ifdef  HAVE_MONGO_SESSION
+  php_info_print_table_row(2, "session handler", "true");
+#endif  /* HAVE_MONGO_SESSION */
 
   php_info_print_table_end();
 

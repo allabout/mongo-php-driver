@@ -18,7 +18,7 @@
 #ifndef PHP_MONGO_H
 #define PHP_MONGO_H 1
 
-#define PHP_MONGO_VERSION "1.2.13dev"
+#define PHP_MONGO_VERSION "1.2.12"
 #define PHP_MONGO_EXTNAME "mongo"
 
 // resource names
@@ -603,6 +603,15 @@ int pool_size;
 
 	long ping_interval;
 	long is_master_interval;
+    
+#ifdef  HAVE_MONGO_SESSION
+    char    *session_url;
+    char    *session_db;
+    char    *session_collection;
+    int     session_expire;
+    char    *session_replica_name;
+#endif  /* HAVE_MONGO_SESSION */
+
 ZEND_END_MODULE_GLOBALS(mongo)
 
 #ifdef ZTS
@@ -614,6 +623,13 @@ ZEND_END_MODULE_GLOBALS(mongo)
 
 extern zend_module_entry mongo_module_entry;
 #define phpext_mongo_ptr &mongo_module_entry
+
+
+#ifdef  HAVE_MONGO_SESSION
+#include "ext/session/php_session.h"
+extern ps_module ps_mod_mongo;
+#include "session/mongo_session.h"
+#endif  /* HAVE_MONGO_SESSION */
 
 #endif
 
