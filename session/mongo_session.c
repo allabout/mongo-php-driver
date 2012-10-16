@@ -106,7 +106,9 @@ PS_OPEN_FUNC(mongo)
     ZVAL_NULL(return_value);
     MAKE_STD_ZVAL(options);
     array_init(options);
-    add_assoc_string(options, "replicaSet", session->replica_name, 1);
+    if(strlen(MonGlo(session_replica_name)) != 0){
+        add_assoc_string(options, "replicaSet", session->replica_name, 1);
+    }
     MONGO_METHOD2(Mongo, __construct, return_value, session->mongo, session->url, options);
     FREE_ZVAL(return_value);
 
